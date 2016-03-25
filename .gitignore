@@ -16,7 +16,8 @@ gen/
 .gradle/
 .idea/
 build/
-springboard.iml
+/springboard.iml
+
 
 # Local configuration file (sdk path, etc)
 local.properties
