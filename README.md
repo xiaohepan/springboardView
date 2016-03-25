@@ -2,12 +2,16 @@
     this is a view that can drag sort buttons and merge buttons to a folder.
     能够拖动排序菜单，和合并文件夹,删除按钮View。
     效果类似桌面和招商手机银行app最爱菜单.
-#Features
+# Features
     1:drag sort the buttons.拖动排序
     2:drag button into a folder.把按钮拖进文件夹
     3:drag button out of a folder.把按钮拖出文件夹
     4:delete buttons in menu and folder.能够删除菜单和文件夹中的按钮
     5:rename the folder.文件夹重命名.
+# view
+    ![image](https://github.com/xiaohepan/springboard/blob/master/pic/S60325-151605.jpg)
+    ![image](https://github.com/xiaohepan/springboard/blob/master/pic/S60325-151609.jpg)
+    
 # How to Work with the Source
     1:make your data model extends com.panxiaohe.springboard.library.FavoritesItem;
 
@@ -38,5 +42,5 @@
         <attr name="folder_edittext_background" format="color|reference"/>
         <attr name="folder_edittext_textcolor" format="color|reference"/>
         <attr name="folder_edittext_textsize" format="dimension|reference"/>
-#notice
+# notice
     this view is not well tested.
