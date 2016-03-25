@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="delete_button_id" type="id"/>
+    <!--shake zone-->
+    <item name="shake_zone_id" type="id"/>
+    <!--center_zone,if in center_zone will merge item to folder-->
+    <item name="center_zone_id" type="id"/>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@android:color/white"
+    tools:context=".demo.MainActivity">
+
+    <com.panxiaohe.springboard.library.MenuView
+        android:id="@+id/springboard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:row_count = "3"
+        app:column_count = "3"
+        app:divider_width ="1dp"
+        app:divider_color = "@color/default_divider_color"
+        app:default_folder_name="@string/folder_name"
+        app:delete_icon = "@drawable/icon_delete"
+        app:is_last_item_stable = "true"
+        app:stable_header_count = "3"
+        app:folder_dialog_background ="@android:color/transparent"
+        app:folder_view_background ="@drawable/ugly_folder_background"
+        app:folder_row_count ="3"
+        app:folder_column_count ="3"
+        app:folder_edittext_background ="@drawable/ugly_edittext_bg"
+        app:folder_edittext_textcolor ="@android:color/white"
+        app:folder_edittext_textsize ="16sp"
+
+        style = "@style/Springboard"/>
+
+        <!--app:divider_color =""-->
+</RelativeLayout>
