@@ -9,9 +9,7 @@
     4:delete buttons in menu and folder.能够删除菜单和文件夹中的按钮
     5:rename the folder.文件夹重命名.
 # view
-    normal_mode vs editing_mode
-![image1](https://github.com/xiaohepan/springboard/blob/master/pic/S60325-151605.jpg)
-![image2](https://github.com/xiaohepan/springboard/blob/master/pic/S60325-151609.jpg) 
+![image1](https://github.com/xiaohepan/springboard/blob/master/pic/screenshot.gif) 
 # How to Work with the Source
     1:make your data model extends com.panxiaohe.springboard.library.FavoritesItem;
 
