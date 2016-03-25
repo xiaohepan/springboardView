@@ -19,14 +19,11 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Scroller;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by panxiaohe on 16/3/9.
@@ -38,43 +35,37 @@ import java.util.List;
 public abstract  class SpringboardView extends ViewGroup
 {
 
-
-    /**
-     * callback at merge into Folder,delete item,add item,remove out Folder,exchange position and change folderName
-     * 按钮添加,删除,改变位置,改变文件夹名字时回调
-     * */
-//    private OnItemDataChangeListener onItemDataChangeListener;
+//    #页面相关
     /**
      * callback onPageCountChange() at totalPage count change
      * callback onPageScroll() at mCurScreen change
      * 在页面数量和当面页面发生变化时回调
      * */
     private OnPageChangedListener onPageChangedListener;
-
+    /**
+     * 适配器
+     * */
+    protected SpringboardAdapter mAdapter;
     /**
      * 总页面数量
      *  will count totalPage at setAdapter,merge into Folder,delete item,add item,remove out Folder
      */
     private int totalPage = 0;
-
     /**
      * 现在页面
      * */
     private int mCurScreen = 0;
 
-    protected SpringboardAdapter mAdapter;
 
+//    #触摸相关
     /**
-     * 保存正在动画着的点防止动画冲突
+     * 开始时的x坐标
      */
-    private ArrayList<Integer> animationMap = new ArrayList<Integer>();
-//
-//    //
-//    private int halfBitmapWidth;
-//    //
-//    private int halfBitmapHeight;
-
-
+    private int startX = 0;
+    /**
+     * 速度计算
+     */
+    private VelocityTracker mVelocityTracker;
     /**
      * 最后的触摸位置X
      */
@@ -83,7 +74,6 @@ public abstract  class SpringboardView extends ViewGroup
      * 最后的触摸位置Y
      */
     private float mLastMotionY;
-
     /**
      * 触摸点距离View左边的距离
      */
@@ -100,95 +90,71 @@ public abstract  class SpringboardView extends ViewGroup
      * view上边距离屏幕的距离
      */
     private int dragOffsetY;
-
     /**
      * 当前手指触摸的位置
      */
     protected int dragPosition = -1;
-
     /**
      * 拖动开始时和顺序交换之后被拖动View的位置
      */
     protected int temChangPosition = -1;
-
-    private int startX = 0;
-
-    private VelocityTracker mVelocityTracker;
-
-
-
+    protected Scroller mScroller;
+    private int mTouchSlop;
+    private int mMinimumVelocity;
+    private int mMaximumVelocity;
     private MODE mode = MODE.FREE;
-
     enum MODE {
         //普通时,按钮被长按之后,进入这个模式,滚动模式
         FREE, DRAGGING, SCROLL
     }
 
+
+
+//  #各种属性
     /**
      * 删除按钮
      * */
     private Drawable deleteIcon;
-
     /**
      * 几行
      */
-    private int rowCount = 3;
-
+    private int rowCount;
     /**
      * 几列
      */
-    private int colCount = 3;
-
-
+    private int colCount;
     /**
      * 合并按钮,产生文件夹时的默认按钮
      * */
     protected String defaultFolderName;
-
     protected int dividerWidth;
     protected int dividerColor;
-
-    private Scroller mScroller;
-    private int mTouchSlop;
-    private int mMinimumVelocity;
-    private int mMaximumVelocity;
-
     private boolean isLastItemStable;
-
-    private int stableHeaderCount = 0;
-
+    private int stableHeaderCount;
     protected int page_divider_width;
-    protected int page_divider_color;
 
-    public SpringboardView(Context context) {
+
+
+    private Paint mPaint;
+    protected LayoutTransition mLayoutTransition;
+//  private int halfBitmapWidth;
+//  private int halfBitmapHeight;
+
+    public SpringboardView(Context context)
+    {
         this(context, null);
-//        Log.e("init", "1");
-        ScrollView v;
     }
 
-    public SpringboardView(Context context, AttributeSet attrs) {
+    public SpringboardView(Context context, AttributeSet attrs)
+    {
         this(context, attrs, R.style.Springboard);
-//        Log.e("init", "2 -->"+R.style.Springboard);
     }
 
     public SpringboardView(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
-//        Log.e("init", "3 -->" + defStyle);
-        initSpringboardView(context,attrs,defStyle,0);
+        initSpringboardView(context, attrs, defStyle, 0);
     }
-
-    private Paint mPaint;
-    private boolean isTransitionint = false;
-
-
-//    public SpringboardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
-//    {
-//        super(context, attrs, defStyleAttr, defStyleRes);
-//        Log.e("init", "4 -->"+defStyleAttr);
-//
-//        initSpringboardView();
-//    }
 
     private void initSpringboardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         final TypedArray a = context.obtainStyledAttributes(
@@ -215,11 +181,13 @@ public abstract  class SpringboardView extends ViewGroup
         setOverScrollMode(OVER_SCROLL_ALWAYS);
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
-        mMinimumVelocity = 40;
+        mMinimumVelocity = 1000;
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        setLayoutTransition(new LayoutTransition());
-        LayoutTransition mLayoutTransition = new LayoutTransition();
+        mLayoutTransition = new LayoutTransition();
+        mLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING, null);
+        mLayoutTransition.setAnimator(LayoutTransition.APPEARING, null);
+        setLayoutTransition(mLayoutTransition);
     }
 
     @Override
@@ -228,22 +196,18 @@ public abstract  class SpringboardView extends ViewGroup
         int childWidth;
         int childHeight;
         int measuredHeight;
-
         //父给出的宽度,不管什么模式用完
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-
         //可以使用的宽度
         int usedWidth = width - getPaddingLeft() - getPaddingRight() - (colCount + 1)
                 * dividerWidth;
         childWidth = usedWidth / colCount;
-
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         //如果有准确高度,按准确高度计算.
         if(heightMode == MeasureSpec.EXACTLY)
         {
-//            Log.e("高度","MeasureSpec.EXACTLY");
             int usedHeight = height - getPaddingTop() - getPaddingBottom() - (rowCount +1)
                     * dividerWidth;
 
@@ -252,17 +216,13 @@ public abstract  class SpringboardView extends ViewGroup
             measuredHeight = height;
         }else
         {
-//            如果没有准确高度,和宽度等长
-//            Log.e("高度","MeasureSpec.atmost");
             childHeight = childWidth;
-            //        计算出需要的高度
             measuredHeight = childHeight * rowCount + (rowCount +1) * dividerWidth + getPaddingTop() + getPaddingBottom();
         }
         if(measuredHeight > height)
         {
             measuredHeight = height;
         }
-
         int childWidthSpec = getChildMeasureSpec(
                 MeasureSpec
                         .makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
@@ -272,7 +232,6 @@ public abstract  class SpringboardView extends ViewGroup
                 MeasureSpec
                         .makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
                 0, childHeight);
-
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
@@ -314,9 +273,9 @@ public abstract  class SpringboardView extends ViewGroup
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas canvas)
+    {
         super.onDraw(canvas);
-//        Log.e("onDraw", getTotalPage() + "");
         mPaint.setColor(dividerColor);
         int childHeight = getChildHeight();
         int childWidth = getChildWidth();
@@ -349,8 +308,15 @@ public abstract  class SpringboardView extends ViewGroup
     {
 //        Log.e("onInterceptTouchEvent", getActionName(ev));
         int action = ev.getAction();
+
+        if((action == MotionEvent.ACTION_MOVE)&&(mode == MODE.DRAGGING))
+        {
+            return true;
+        }
+
         float x = ev.getX();
         float y = ev.getY();
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 startX = (int) x;
@@ -358,76 +324,76 @@ public abstract  class SpringboardView extends ViewGroup
                 dragOffsetY = (int) (ev.getRawY() - y);
                 mLastMotionX = x;
                 mLastMotionY = y;
+                initOrResetVelocityTracker();
+                mVelocityTracker.addMovement(ev);
                 stopScroll();
                 break;
             case MotionEvent.ACTION_MOVE:
-//                 判断是否可以左右滑动
-                if(mode == MODE.DRAGGING)
+                initVelocityTrackerIfNotExists();
+                mVelocityTracker.addMovement(ev);
+                int deltaX = (int) (mLastMotionX - x);
+                if (ifCanScroll(deltaX))
                 {
+                    mode = MODE.SCROLL;
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    recycleVelocityTracker();
                     return true;
-                }else
-                {
-                    int deltaX = (int) (mLastMotionX - x);
-                    if (ifCanScroll(deltaX))
-                    {
-                        getParent().requestDisallowInterceptTouchEvent(true);
-                        mode = MODE.SCROLL;
-//                        Log.e("SpringboardView", "开始滑动");
-                        return true;
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-//                如果不是处于free，也要处理事件
-                if(mode == MODE.DRAGGING) {
-                    dragPosition = pointToPosition((int)x, (int)y);
-//                    Log.e("SpringboardView", "结束拖动");
-                    endDrag((int)x,(int)y);
-                } else if(mode == MODE.SCROLL ){
-//                     获得这次触摸事件的移动距离
-//                    Log.e("SpringboardView", "手指离开，滑动文件夹到目标页面");
-                	getParent().requestDisallowInterceptTouchEvent(false);
-                    float distance = ev.getRawX() - startX;
-                    endScroll(distance);
-
-                }
-                if (mode != MODE.FREE){
-                    return  true;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-//                取消事件也要处理
-            	mode = MODE.FREE;
-                return true;
+                getAdapter().setEditing(false);
+            case MotionEvent.ACTION_UP:
+
+                if(mode == MODE.DRAGGING)
+                {
+                    dragPosition = pointToPosition((int)x, (int)y);
+                    onDragFinished(ev);
+                    endDrag((int)x,(int)y);
+                } else if(mode == MODE.SCROLL )
+                {
+                    float distance = ev.getRawX() - startX;
+                    endScroll(distance);
+                }else
+                {
+                    getAdapter().setEditing(false);
+                }
+                if (mode != MODE.FREE)
+                {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+                startX = 0;
+                mode = MODE.FREE;
+                recycleVelocityTracker();
+                break;
         }
         return false;
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event)
+    {
 //        Log.e("onTouchEvent", getActionName(event));
         int action = event.getAction();
         int x = (int) event.getX();
         int y = (int) event.getY();
-        switch (action) {
+
+        switch (action)
+        {
             case MotionEvent.ACTION_MOVE:
-                switch (mode) {
+                switch (mode)
+                {
                     case DRAGGING:
                         int viewX = x - dragPointX + dragOffsetX;
                         int viewY = y - dragPointY + dragOffsetY;
                         onFling(viewX, viewY);
-
-                        if (mVelocityTracker != null)
-                        {
-                            mVelocityTracker.addMovement(event);
-                            mVelocityTracker.computeCurrentVelocity(1000,mMaximumVelocity);
+                        mVelocityTracker.addMovement(event);
+                        mVelocityTracker.computeCurrentVelocity(1000,mMaximumVelocity);
                             //  判断速度如果速度大于highSpeed，不处理移动
-                            dragPosition = pointToPosition(x, y);
-                            if(mScroller.isFinished())
-                            {
-                                float v = calculateV(mVelocityTracker.getXVelocity(),mVelocityTracker.getYVelocity());
-                                onBeingDragging(event, v);
-                            }
+                        dragPosition = pointToPosition(x, y);
+                        if(mScroller.isFinished()&&(!mLayoutTransition.isRunning()))
+                        {
+                            float v = calculateV(mVelocityTracker.getXVelocity(),mVelocityTracker.getYVelocity());
+                            onBeingDragging(event, v);
                         }
                         break;
                     case SCROLL:
@@ -439,53 +405,35 @@ public abstract  class SpringboardView extends ViewGroup
                         int deltaX1 = (int) (mLastMotionX - x);
                         if (ifCanScroll(deltaX1))
                         {
-//                            Log.e("SpringboardView", "开始滑动");
                             getParent().requestDisallowInterceptTouchEvent(true);
                             mode = MODE.SCROLL;
-                            return true;
                         }
                         break;
                 }
                 break;
+            case MotionEvent.ACTION_CANCEL:
+                getAdapter().setEditing(false);
             case MotionEvent.ACTION_UP:
                 if(mode == MODE.DRAGGING)
                 {
-//                    Log.e("SpringboardView", "结束拖动");
                     dragPosition = pointToPosition(x, y);
                     onDragFinished(event);
                     endDrag((int) x, (int) y);
-                } else if(mode == MODE.SCROLL ){
-//                     获得这次触摸事件的移动距离
-//                    Log.e("SpringboardView", "手指离开，滑动文件夹到目标页面");
+                } else if(mode == MODE.SCROLL )
+                {
                     float distance = event.getRawX() - startX;
                     endScroll(distance);
                 }else
                 {
-                    if(getAdapter().isEditting())
-                    {
-                        getAdapter().setEditing(false);
-                    }
-                }
-                startX = 0;
-                mode = MODE.FREE;
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                if (getAdapter().isEditting()) {
                     getAdapter().setEditing(false);
                 }
-                if(mode == MODE.DRAGGING) {
-                    dragPosition = pointToPosition(x, y);
-                    onDragFinished(event);
-                    endDrag((int)x,(int)y);
-//                    Log.e("SpringboardView", "结束拖动");
-                } else if(mode == MODE.SCROLL ){
-//                     获得这次触摸事件的移动距离
-                    float distance = event.getRawX() - startX;
-                    endScroll(distance);
-//                    Log.e("SpringboardView", "手指离开，滑动文件夹到目标页面");
+                if (mode != MODE.FREE)
+                {
+                    getParent().requestDisallowInterceptTouchEvent(false);
                 }
                 startX = 0;
                 mode = MODE.FREE;
+                recycleVelocityTracker();
                 break;
         }
         return true;
@@ -530,7 +478,8 @@ public abstract  class SpringboardView extends ViewGroup
     /**
      * 开始拖动
      */
-    private void startDrag(View itemView) {
+    private void startDrag(View itemView)
+    {
         mode = MODE.DRAGGING;
         getParent().requestDisallowInterceptTouchEvent(true);
 //        halfBitmapWidth = itemView.getWidth() / 2;
@@ -540,7 +489,8 @@ public abstract  class SpringboardView extends ViewGroup
         initOrResetVelocityTracker();
     }
 
-    public void endDrag(int x,int y){
+    public void endDrag(int x,int y)
+    {
         mode = MODE.FREE;
         if(temChangPosition!=-1)
         {
@@ -548,7 +498,6 @@ public abstract  class SpringboardView extends ViewGroup
         }
 //        showDropAnimation(x, y);
         getParent().requestDisallowInterceptTouchEvent(false);
-        recycleVelocityTracker();
         dragPosition = temChangPosition = -1;
         FingerFlowViewManager.getInstance().remove();
     }
@@ -568,6 +517,11 @@ public abstract  class SpringboardView extends ViewGroup
         }
     }
 
+    private void initVelocityTrackerIfNotExists() {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
     /**
      * 更新拖动的坐标，让图标跟随手一起动
      *
@@ -585,11 +539,11 @@ public abstract  class SpringboardView extends ViewGroup
     * */
     protected void stopScroll()
     {
-        if (!mScroller.isFinished()) {
+        if (!mScroller.isFinished())
+        {
             //	中止移动动画
             mScroller.abortAnimation();
         }
-
     }
 
     /**
@@ -906,113 +860,6 @@ public abstract  class SpringboardView extends ViewGroup
 
     public abstract  void onDelete(int position);
 
-    /**
-     * 移动动画
-     *
-     * @param fromPosition 拖动开始的位置
-     * @param toPosition   拖动到达的位置
-     */
-    protected void movePostionAnimation(int fromPosition, int toPosition)
-    { // 0,2
-        int moveNum = toPosition - fromPosition; //  2
-//		不再同一个按钮内并且没有快速滑动冲突
-        if (moveNum != 0 && !isMovingFastConflict(moveNum)) {
-            int absMoveNum = Math.abs(moveNum);
-            int j = moveNum / absMoveNum;
-            for (int i = 0; i < absMoveNum; i++) {
-                int holdPosition = fromPosition + j;   //1\2,
-                View view = getChildAt(holdPosition);
-                view.clearAnimation();
-                view.startAnimation(animationPositionToPosition(fromPosition,
-                            holdPosition));
-                fromPosition = holdPosition;
-            }
-        }
-    }
-
-//    /*
-//   * 当移动太快时，判断是否有位置正在进行动画
-//   * **/
-    protected boolean isMovingFastConflict(int moveNum) {
-        int itemsMoveNum = Math.abs(moveNum);
-        int j = moveNum / itemsMoveNum;
-        int temp = dragPosition;
-        for (int i = 0; i < itemsMoveNum; i++) {
-            temp = temp + j;
-            if (animationMap.contains(temp)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-//    public void setAnimationEnd(){
-//        animationMap.clear();
-//    }
-
-    /**
-     * 动画监听，作用是在动画开始和结束时，维护animationMap，以保证快速滑动时动画不会冲突
-     */
-    private class NotifyDataSetListener implements Animation.AnimationListener {
-
-        private int movedPosition;
-
-        public NotifyDataSetListener(int primaryPosition) {
-            this.movedPosition = primaryPosition;
-        }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-            if (animationMap.contains(movedPosition)) {
-                // remove from map when end
-                animationMap.remove(Integer.valueOf(movedPosition));
-            }
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-        }
-
-        @Override
-        public void onAnimationStart(Animation animation) {
-            // put into map when start
-            animationMap.add(movedPosition);
-        }
-    }
-    /**
-     * 根据位置生成动画
-     * 该位置是交换后的位置，所以必须要调用adapter.exchange();
-     */
-    protected Animation animationPositionToPosition(int oldP, int newP) {
-//		Log.e("movePostionAnimation","from position "+oldP+"to position"+newP);
-        PointF oldPF = positionToPoint2(oldP);
-        PointF newPF = positionToPoint2(newP);
-        TranslateAnimation animation;
-        // when moving forward across pages,the first item of the new page moves
-        // backward
-        if (newP > oldP && newP % getPageItemCount() == 0) {
-            animation = new TranslateAnimation(getMeasuredWidth() - oldPF.x, 0,
-                    25 - getMeasuredWidth(), 0);
-            animation.setDuration(800);
-        }
-        // when moving backward across pages,the last item of the new page moves
-        // forward
-        else if (newP < oldP && oldP != 0 && oldP % getPageItemCount() == 0) {
-            animation = new TranslateAnimation(newPF.x - getMeasuredWidth(), 0,
-                    getMeasuredWidth() -25, 0);
-            animation.setDuration(800);
-        }
-        // regular animation between two neighbor items
-        else {
-            animation = new TranslateAnimation(newPF.x - oldPF.x, 0, newPF.y
-                    - oldPF.y, 0);
-            animation.setDuration(500);
-        }
-        animation.setFillAfter(true);
-        animation.setAnimationListener(new NotifyDataSetListener(oldP));
-        return animation;
-    }
 
 //    /**
 //     * 往下掉的动画
@@ -1112,25 +959,10 @@ public abstract  class SpringboardView extends ViewGroup
         this.onPageChangedListener = onPageChangedListener;
     }
 
-//    public OnItemDataChangeListener getOnItemDataChangeListener()
-//    {
-//        return onItemDataChangeListener;
-//    }
-//
-//    public void setOnItemDataChangeListener(OnItemDataChangeListener onItemDataChangeListener)
-//    {
-//        this.onItemDataChangeListener = onItemDataChangeListener;
-//    }
-
     public interface OnPageChangedListener
     {
         void onPageScroll(int from, int to);
         void onPageCountChange(int oldCount,int newCount);
-    }
-
-    public interface OnItemDataChangeListener
-    {
-        void onItemDataChange();
     }
 
     public interface OnItemClickListener

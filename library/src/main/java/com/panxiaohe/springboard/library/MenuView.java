@@ -9,6 +9,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -176,7 +177,7 @@ public class MenuView extends SpringboardView
         			//如果被拖动的是文件夹或者不在item内部区域，交换位置
         			if((getAdapter().getItem(temChangPosition).isFolder())||(!isInCenter(dragPosition, event)))
              	   	{
-//             		   Log.e("MenuView", "拖动中,交换位置，从"+temChangPosition +"到" +dragPosition);
+             		   Log.e("MenuView", "拖动中,交换位置，从" + temChangPosition + "到" + dragPosition);
              		   onExchange();
                     }else
                     {
@@ -185,9 +186,11 @@ public class MenuView extends SpringboardView
             	}
         	}
             countPageChange(x);
+        }else
+        {
+            Log.e("MenuView", "speed too fast v= "+v);
         }
     }
-    ArrayList<Rect> rects = new ArrayList<>();;
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -217,10 +220,11 @@ public class MenuView extends SpringboardView
     @Override
     public void onExchange()
     {
-        mAdapter.exchangeItem(temChangPosition,dragPosition);
+        mAdapter.exchangeItem(temChangPosition, dragPosition);
+        temChangPosition = dragPosition;
 //        movePostionAnimation(temChangPosition, dragPosition);
         getChildAt(dragPosition).setVisibility(View.INVISIBLE);
-        temChangPosition = dragPosition;
+
     }
 
     @Override
@@ -293,6 +297,12 @@ public class MenuView extends SpringboardView
      */
     protected void dragOnChild(FavoritesItem dragOutItem, MotionEvent event)
     {
+
+        if(!mScroller.isFinished() || mLayoutTransition.isRunning())
+        {
+            return;
+        }
+
         int x = (int) event.getRawX();
         int y = (int) event.getRawY();
         int[] locations = new int[2];

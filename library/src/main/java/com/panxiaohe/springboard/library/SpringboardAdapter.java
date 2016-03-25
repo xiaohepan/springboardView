@@ -1,6 +1,7 @@
 package com.panxiaohe.springboard.library;
 
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -76,6 +77,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void exchangeItem(int fromPosition ,int toPosition)
     {
+        Log.e("SpringboardAdapter","exchangeItem fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T item = items.remove(fromPosition);
 
         SpringboardView container = getSpringboardView();
@@ -96,6 +98,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void exChangeSubItem(int folderPosition,int fromPosition ,int toPosition)
     {
+        Log.e("SpringboardAdapter","exChangeSubItem folderPosition = "+folderPosition +"  fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T folder = items.get(folderPosition);
 
         T item = (T)folder.getMenuList().remove(fromPosition);
@@ -120,6 +123,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void deleteItem(int position)
     {
+        Log.e("SpringboardAdapter","deleteItem position = "+position);
         items.remove(position);
 
         onDataChange();
@@ -129,6 +133,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void deleteItem(int folderPosition,int position)
     {
+        Log.e("SpringboardAdapter","deleteItem folderPosition = "+folderPosition+"  position = "+position);
         T folder = items.get(folderPosition);
 
         folder.removeSubButton(position);
@@ -154,6 +159,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void mergeItem(int fromPosition, int toPosition,String defaultFolderName)
     {
+        Log.e("SpringboardAdapter","mergeItem fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T fromItem = items.get(fromPosition);
 
         T toItem = items.get(toPosition);
@@ -192,6 +198,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void addItem(int position , T item)
     {
+        Log.e("SpringboardAdapter","addItem position = "+position);
         items.add(position, item);
 
         onDataChange();
@@ -206,6 +213,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void addItemToFolder(int dragPosition, T dragOutItem,String defaultName)
     {
+        Log.e("SpringboardAdapter","addItemToFolder position = "+dragPosition);
         T folder = items.get(dragPosition);
 
         folder.addSubButton(dragOutItem, defaultName);
