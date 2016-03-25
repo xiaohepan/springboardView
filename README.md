@@ -1,4 +1,4 @@
-# springboard
+# springboard View
     this is a view that can drag sort buttons and merge buttons to a folder.
     能够拖动排序菜单，和合并文件夹,删除按钮View。
     效果类似桌面和招商手机银行app最爱菜单.
