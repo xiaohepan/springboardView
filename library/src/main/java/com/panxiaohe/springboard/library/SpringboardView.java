@@ -181,7 +181,7 @@ public abstract  class SpringboardView extends ViewGroup
         setOverScrollMode(OVER_SCROLL_ALWAYS);
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
-        mMinimumVelocity = 1000;
+        mMinimumVelocity = 700;
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLayoutTransition = new LayoutTransition();
