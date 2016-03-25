@@ -3,13 +3,11 @@ package com.panxiaohe.springboard.library;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -93,14 +91,6 @@ public class MenuView extends SpringboardView
         init(context, attrs, defStyle, 0);
     }
 
-//    public MenuView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
-//    {
-//        super(context, attrs, defStyleAttr, defStyleRes);
-//
-//
-//        init(context);
-//    }
-
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
         final TypedArray a = context.obtainStyledAttributes(
@@ -177,19 +167,21 @@ public class MenuView extends SpringboardView
         			//如果被拖动的是文件夹或者不在item内部区域，交换位置
         			if((getAdapter().getItem(temChangPosition).isFolder())||(!isInCenter(dragPosition, event)))
              	   	{
-             		   Log.e("MenuView", "拖动中,交换位置，从" + temChangPosition + "到" + dragPosition);
+//             		   Log.e("MenuView", "拖动中,交换位置，从" + temChangPosition + "到" + dragPosition);
              		   onExchange();
-                    }else
-                    {
-//                        Log.e("MenuView", "在文件夹中dragPosition = "+dragPosition);
                     }
+//                    else
+//                    {
+//                        Log.e("MenuView", "在文件夹中dragPosition = "+dragPosition);
+//                    }
             	}
         	}
             countPageChange(x);
-        }else
-        {
-            Log.e("MenuView", "speed too fast v= "+v);
         }
+//        else
+//        {
+//            Log.e("MenuView", "speed too fast v= "+v);
+//        }
     }
 
     @Override
@@ -201,8 +193,8 @@ public class MenuView extends SpringboardView
     @Override
     public void onDragFinished(MotionEvent event)
     {
-        int x = (int) event.getX();
-        int y = (int) event.getY();
+//        int x = (int) event.getX();
+//        int y = (int) event.getY();
        //可以合并
        if (getAdapter().ifCanMerge(temChangPosition, dragPosition))
        {

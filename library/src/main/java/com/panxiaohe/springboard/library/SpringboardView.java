@@ -21,7 +21,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.Scroller;
 
 
@@ -306,11 +305,13 @@ public abstract  class SpringboardView extends ViewGroup
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev)
     {
-//        Log.e("onInterceptTouchEvent", getActionName(ev));
+//        Log.e("onInterceptTouchEvent", ev.toString());
         int action = ev.getAction();
 
         if((action == MotionEvent.ACTION_MOVE)&&(mode == MODE.DRAGGING))
         {
+            initVelocityTrackerIfNotExists();
+            mVelocityTracker.addMovement(ev);
             return true;
         }
 
@@ -327,6 +328,10 @@ public abstract  class SpringboardView extends ViewGroup
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
                 stopScroll();
+                if(mAdapter!=null)
+                {
+                    mAdapter.setIsTouching(true);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 initVelocityTrackerIfNotExists();
@@ -343,7 +348,10 @@ public abstract  class SpringboardView extends ViewGroup
             case MotionEvent.ACTION_CANCEL:
                 getAdapter().setEditing(false);
             case MotionEvent.ACTION_UP:
-
+                if(mAdapter!=null)
+                {
+                    mAdapter.setIsTouching(false);
+                }
                 if(mode == MODE.DRAGGING)
                 {
                     dragPosition = pointToPosition((int)x, (int)y);
@@ -353,9 +361,6 @@ public abstract  class SpringboardView extends ViewGroup
                 {
                     float distance = ev.getRawX() - startX;
                     endScroll(distance);
-                }else
-                {
-                    getAdapter().setEditing(false);
                 }
                 if (mode != MODE.FREE)
                 {
@@ -372,7 +377,7 @@ public abstract  class SpringboardView extends ViewGroup
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-//        Log.e("onTouchEvent", getActionName(event));
+//        Log.e("onTouchEvent", event.toString());
         int action = event.getAction();
         int x = (int) event.getX();
         int y = (int) event.getY();
@@ -414,6 +419,10 @@ public abstract  class SpringboardView extends ViewGroup
             case MotionEvent.ACTION_CANCEL:
                 getAdapter().setEditing(false);
             case MotionEvent.ACTION_UP:
+                if(mAdapter!=null)
+                {
+                    mAdapter.setIsTouching(false);
+                }
                 if(mode == MODE.DRAGGING)
                 {
                     dragPosition = pointToPosition(x, y);
