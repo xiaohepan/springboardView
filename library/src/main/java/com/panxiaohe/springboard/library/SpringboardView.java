@@ -217,7 +217,7 @@ public abstract class SpringboardView extends ViewGroup
 
         } else
         {
-            childHeight = childWidth;
+            childHeight = usedWidth / colCount;
 
             measuredHeight = childHeight * rowCount + (rowCount + 1) * dividerWidth + getPaddingTop() + getPaddingBottom();
 
@@ -365,7 +365,7 @@ public abstract class SpringboardView extends ViewGroup
                 {
                     dragPosition = pointToPosition((int) x, (int) y);
                     onDragFinished(ev);
-                    endDrag((int) x, (int) y);
+                    endDrag();
                 } else if (mode == MODE.SCROLL)
                 {
                     float distance = ev.getRawX() - startX;
@@ -436,7 +436,7 @@ public abstract class SpringboardView extends ViewGroup
                 {
                     dragPosition = pointToPosition(x, y);
                     onDragFinished(event);
-                    endDrag((int) x, (int) y);
+                    endDrag();
                 } else if (mode == MODE.SCROLL)
                 {
                     float distance = event.getRawX() - startX;
@@ -509,7 +509,7 @@ public abstract class SpringboardView extends ViewGroup
         initOrResetVelocityTracker();
     }
 
-    public void endDrag(int x, int y)
+    public void endDrag()
     {
         mode = MODE.FREE;
         if (temChangPosition != -1)
@@ -969,11 +969,6 @@ public abstract class SpringboardView extends ViewGroup
     public int getmCurScreen()
     {
         return mCurScreen;
-    }
-
-    public void setmCurScreen(int mCurScreen)
-    {
-        this.mCurScreen = mCurScreen;
     }
 
     public int getRowCount()

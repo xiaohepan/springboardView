@@ -73,7 +73,7 @@ public class MyButtonItem extends FavoritesItem
     }
 
     @Override
-    protected FavoritesItem removeSubItem(int position)
+    protected MyButtonItem removeSubItem(int position)
     {
         return menuList.remove(position);
     }
@@ -96,22 +96,6 @@ public class MyButtonItem extends FavoritesItem
         this.actionId = myButtonItem.actionId;
         this.icon = myButtonItem.icon;
     }
-
-//    @Override
-//    public ArrayList<MyButtonItem> getMenuList() {
-//        return menuList;
-//    }
-//
-//    @Override
-//    public void setMenuList(ArrayList<MyButtonItem> menuList)
-//    {
-//        if(menuList!=null && menuList.size() ==1)
-//        {
-//            throw new IllegalStateException("menuList.size() must large than 1");
-//        }
-//
-//        this.menuList = menuList;
-//    }
 
     @Override
     public int getSubItemCount()
@@ -136,11 +120,6 @@ public class MyButtonItem extends FavoritesItem
     public int getIcon()
     {
         return icon;
-    }
-
-    public void setIcon(int icon)
-    {
-        this.icon = icon;
     }
 
     public MyButtonItem(String actionId, String actionName, int icon)
