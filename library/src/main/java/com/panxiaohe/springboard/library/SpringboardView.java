@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -26,12 +25,12 @@ import android.widget.Scroller;
 
 /**
  * Created by panxiaohe on 16/3/9.
- *
+ * <p/>
  * 这个类提供布局相关,各种监听的设置和基本事件的处理
- *
+ * <p/>
  * 具体的各种触摸事件处理请使用子类
  */
-public abstract  class SpringboardView extends ViewGroup
+public abstract class SpringboardView extends ViewGroup
 {
 
 //    #页面相关
@@ -39,20 +38,20 @@ public abstract  class SpringboardView extends ViewGroup
      * callback onPageCountChange() at totalPage count change
      * callback onPageScroll() at mCurScreen change
      * 在页面数量和当面页面发生变化时回调
-     * */
+     */
     private OnPageChangedListener onPageChangedListener;
     /**
      * 适配器
-     * */
+     */
     protected SpringboardAdapter mAdapter;
     /**
      * 总页面数量
-     *  will count totalPage at setAdapter,merge into Folder,delete item,add item,remove out Folder
+     * will count totalPage at setAdapter,merge into Folder,delete item,add item,remove out Folder
      */
     private int totalPage = 0;
     /**
      * 现在页面
-     * */
+     */
     private int mCurScreen = 0;
 
 
@@ -102,17 +101,18 @@ public abstract  class SpringboardView extends ViewGroup
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     private MODE mode = MODE.FREE;
-    enum MODE {
+
+    enum MODE
+    {
         //普通时,按钮被长按之后,进入这个模式,滚动模式
         FREE, DRAGGING, SCROLL
     }
 
 
-
 //  #各种属性
     /**
      * 删除按钮
-     * */
+     */
     private Drawable deleteIcon;
     /**
      * 几行
@@ -124,14 +124,13 @@ public abstract  class SpringboardView extends ViewGroup
     private int colCount;
     /**
      * 合并按钮,产生文件夹时的默认按钮
-     * */
+     */
     protected String defaultFolderName;
     protected int dividerWidth;
     protected int dividerColor;
     private boolean isLastItemStable;
     private int stableHeaderCount;
     protected int page_divider_width;
-
 
 
     private Paint mPaint;
@@ -155,7 +154,8 @@ public abstract  class SpringboardView extends ViewGroup
         initSpringboardView(context, attrs, defStyle, 0);
     }
 
-    private void initSpringboardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    private void initSpringboardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
+    {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.Springboard, defStyleAttr, defStyleRes);
         deleteIcon = a.getDrawable(R.styleable.Springboard_delete_icon);
@@ -165,10 +165,10 @@ public abstract  class SpringboardView extends ViewGroup
         dividerWidth = a.getDimensionPixelOffset(R.styleable.Springboard_divider_width, 0);
         dividerColor = a.getColor(R.styleable.Springboard_divider_color, 0);
         isLastItemStable = a.getBoolean(R.styleable.Springboard_is_last_item_stable, false);
-        stableHeaderCount= a.getInt(R.styleable.Springboard_stable_header_count, 0);
+        stableHeaderCount = a.getInt(R.styleable.Springboard_stable_header_count, 0);
         page_divider_width = a.getDimensionPixelOffset(R.styleable.Springboard_page_divider_width, 0);
 
-        if(dividerWidth != 0 && dividerColor != 0)
+        if (dividerWidth != 0 && dividerColor != 0)
         {
             setWillNotDraw(false);
         }
@@ -192,36 +192,44 @@ public abstract  class SpringboardView extends ViewGroup
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
-        int childWidth;
+
         int childHeight;
         int measuredHeight;
         //父给出的宽度,不管什么模式用完
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+//        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+
         //可以使用的宽度
         int usedWidth = width - getPaddingLeft() - getPaddingRight() - (colCount + 1)
                 * dividerWidth;
-        childWidth = usedWidth / colCount;
+        int childWidth = usedWidth / colCount;
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         //如果有准确高度,按准确高度计算.
-        if(heightMode == MeasureSpec.EXACTLY)
+        if (heightMode == MeasureSpec.EXACTLY)
         {
-            int usedHeight = height - getPaddingTop() - getPaddingBottom() - (rowCount +1)
+            int usedHeight = height - getPaddingTop() - getPaddingBottom() - (rowCount + 1)
                     * dividerWidth;
 
             childHeight = usedHeight / rowCount;
 
             measuredHeight = height;
-        }else
+
+        } else
         {
             childHeight = childWidth;
-            measuredHeight = childHeight * rowCount + (rowCount +1) * dividerWidth + getPaddingTop() + getPaddingBottom();
+
+            measuredHeight = childHeight * rowCount + (rowCount + 1) * dividerWidth + getPaddingTop() + getPaddingBottom();
+
+            if (heightMode == MeasureSpec.AT_MOST)
+            {
+                if (measuredHeight > height)
+                {
+                    measuredHeight = height;
+                }
+            }
         }
-        if(measuredHeight > height)
-        {
-            measuredHeight = height;
-        }
+
         int childWidthSpec = getChildMeasureSpec(
                 MeasureSpec
                         .makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
@@ -232,7 +240,8 @@ public abstract  class SpringboardView extends ViewGroup
                         .makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
                 0, childHeight);
         final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++)
+        {
             View child = getChildAt(i);
             child.measure(childWidthSpec, childHeightSpec);
 
@@ -245,7 +254,7 @@ public abstract  class SpringboardView extends ViewGroup
     {
         final int childCount = getChildCount();
 
-        int  measuredWidth = getMeasuredWidth();
+        int measuredWidth = getMeasuredWidth();
 
         for (int i = 0; i < childCount; i++)
         {
@@ -259,10 +268,10 @@ public abstract  class SpringboardView extends ViewGroup
 
                 int col = i % colCount;
 
-                int left = getPaddingLeft() + page * (measuredWidth+page_divider_width) + col
+                int left = getPaddingLeft() + page * (measuredWidth + page_divider_width) + col
                         * (dividerWidth + childView.getMeasuredWidth()) + dividerWidth;
 
-                int top = getPaddingTop() + dividerWidth+row * (dividerWidth + childView.getMeasuredHeight());
+                int top = getPaddingTop() + dividerWidth + row * (dividerWidth + childView.getMeasuredHeight());
 
                 childView.layout(left, top, left + childView.getMeasuredWidth(),
                         top + childView.getMeasuredHeight());
@@ -278,28 +287,27 @@ public abstract  class SpringboardView extends ViewGroup
         mPaint.setColor(dividerColor);
         int childHeight = getChildHeight();
         int childWidth = getChildWidth();
-        int rowCount = getRowCount()+1;
+        int rowCount = getRowCount() + 1;
 
         int pageCount = getTotalPage();
 
-        for(int j = 0; j < pageCount;j++)
+        for (int j = 0; j < pageCount; j++)
         {
-            for(int i = 0;i <rowCount;i++)
+            for (int i = 0; i < rowCount; i++)
             {
-                int count = (childHeight+dividerWidth) * i;
+                int count = (childHeight + dividerWidth) * i;
 
-                canvas.drawRect(j*(getWidth()+page_divider_width),count,(j+1)*getWidth()+ j*page_divider_width,count+dividerWidth ,mPaint);
+                canvas.drawRect(j * (getWidth() + page_divider_width), count, (j + 1) * getWidth() + j * page_divider_width, count + dividerWidth, mPaint);
             }
 
-            int colCount = getColCount()+1;
-            for(int i = 0;i < colCount;i++)
+            int colCount = getColCount() + 1;
+            for (int i = 0; i < colCount; i++)
             {
-                int count = (childWidth+dividerWidth) * i + j*(getWidth()+page_divider_width);
-                canvas.drawRect(count,0,count+dividerWidth,getHeight() ,mPaint);
+                int count = (childWidth + dividerWidth) * i + j * (getWidth() + page_divider_width);
+                canvas.drawRect(count, 0, count + dividerWidth, getHeight(), mPaint);
             }
         }
     }
-
 
 
     @Override
@@ -308,7 +316,7 @@ public abstract  class SpringboardView extends ViewGroup
 //        Log.e("onInterceptTouchEvent", ev.toString());
         int action = ev.getAction();
 
-        if((action == MotionEvent.ACTION_MOVE)&&(mode == MODE.DRAGGING))
+        if ((action == MotionEvent.ACTION_MOVE) && (mode == MODE.DRAGGING))
         {
             initVelocityTrackerIfNotExists();
             mVelocityTracker.addMovement(ev);
@@ -318,7 +326,8 @@ public abstract  class SpringboardView extends ViewGroup
         float x = ev.getX();
         float y = ev.getY();
 
-        switch (action) {
+        switch (action)
+        {
             case MotionEvent.ACTION_DOWN:
                 startX = (int) x;
                 dragOffsetX = (int) (ev.getRawX() - x);
@@ -328,7 +337,7 @@ public abstract  class SpringboardView extends ViewGroup
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
                 stopScroll();
-                if(mAdapter!=null)
+                if (mAdapter != null)
                 {
                     mAdapter.setIsTouching(true);
                 }
@@ -348,16 +357,16 @@ public abstract  class SpringboardView extends ViewGroup
             case MotionEvent.ACTION_CANCEL:
                 getAdapter().setEditing(false);
             case MotionEvent.ACTION_UP:
-                if(mAdapter!=null)
+                if (mAdapter != null)
                 {
                     mAdapter.setIsTouching(false);
                 }
-                if(mode == MODE.DRAGGING)
+                if (mode == MODE.DRAGGING)
                 {
-                    dragPosition = pointToPosition((int)x, (int)y);
+                    dragPosition = pointToPosition((int) x, (int) y);
                     onDragFinished(ev);
-                    endDrag((int)x,(int)y);
-                } else if(mode == MODE.SCROLL )
+                    endDrag((int) x, (int) y);
+                } else if (mode == MODE.SCROLL)
                 {
                     float distance = ev.getRawX() - startX;
                     endScroll(distance);
@@ -392,19 +401,19 @@ public abstract  class SpringboardView extends ViewGroup
                         int viewY = y - dragPointY + dragOffsetY;
                         onFling(viewX, viewY);
                         mVelocityTracker.addMovement(event);
-                        mVelocityTracker.computeCurrentVelocity(1000,mMaximumVelocity);
-                            //  判断速度如果速度大于highSpeed，不处理移动
+                        mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                        //  判断速度如果速度大于highSpeed，不处理移动
                         dragPosition = pointToPosition(x, y);
-                        if(mScroller.isFinished()&&(!mLayoutTransition.isRunning()))
+                        if (mScroller.isFinished() && (!mLayoutTransition.isRunning()))
                         {
-                            float v = calculateV(mVelocityTracker.getXVelocity(),mVelocityTracker.getYVelocity());
+                            float v = calculateV(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
                             onBeingDragging(event, v);
                         }
                         break;
                     case SCROLL:
                         int deltaX = (int) (mLastMotionX - x);
                         mLastMotionX = x;
-                        scrollBy(deltaX,0);
+                        scrollBy(deltaX, 0);
                         break;
                     case FREE:
                         int deltaX1 = (int) (mLastMotionX - x);
@@ -419,20 +428,20 @@ public abstract  class SpringboardView extends ViewGroup
             case MotionEvent.ACTION_CANCEL:
                 getAdapter().setEditing(false);
             case MotionEvent.ACTION_UP:
-                if(mAdapter!=null)
+                if (mAdapter != null)
                 {
                     mAdapter.setIsTouching(false);
                 }
-                if(mode == MODE.DRAGGING)
+                if (mode == MODE.DRAGGING)
                 {
                     dragPosition = pointToPosition(x, y);
                     onDragFinished(event);
                     endDrag((int) x, (int) y);
-                } else if(mode == MODE.SCROLL )
+                } else if (mode == MODE.SCROLL)
                 {
                     float distance = event.getRawX() - startX;
                     endScroll(distance);
-                }else
+                } else
                 {
                     getAdapter().setEditing(false);
                 }
@@ -450,22 +459,23 @@ public abstract  class SpringboardView extends ViewGroup
 
     private float calculateV(float xVelocity, float yVelocity)
     {
-        return (float)Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
+        return (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
     }
 
     /**
-    * 拖动时处理
-    * */
-    public abstract void onBeingDragging(MotionEvent event,float v);
+     * 拖动时处理
+     */
+    public abstract void onBeingDragging(MotionEvent event, float v);
 
     public abstract void onDragFinished(MotionEvent event);
 
-   public abstract void onExchange();
+    public abstract void onExchange();
 
     /**
      * 拖动开始时的初始化
      */
-    public void onStartFling(View itemView, int x, int y) {
+    public void onStartFling(View itemView, int x, int y)
+    {
         itemView.destroyDrawingCache();
         itemView.setDrawingCacheEnabled(true);
         Bitmap bm = Bitmap.createBitmap(itemView.getDrawingCache());
@@ -478,7 +488,8 @@ public abstract  class SpringboardView extends ViewGroup
     }
 
     @Override
-    protected void onDetachedFromWindow() {
+    protected void onDetachedFromWindow()
+    {
         super.onDetachedFromWindow();
 //        Log.e("SpringboardView", "onDetachedFromWindow");
         FingerFlowViewManager.onDestory();
@@ -498,10 +509,10 @@ public abstract  class SpringboardView extends ViewGroup
         initOrResetVelocityTracker();
     }
 
-    public void endDrag(int x,int y)
+    public void endDrag(int x, int y)
     {
         mode = MODE.FREE;
-        if(temChangPosition!=-1)
+        if (temChangPosition != -1)
         {
             getChildAt(temChangPosition).setVisibility(View.VISIBLE);
         }
@@ -511,41 +522,49 @@ public abstract  class SpringboardView extends ViewGroup
         FingerFlowViewManager.getInstance().remove();
     }
 
-    private void recycleVelocityTracker() {
-        if (mVelocityTracker != null) {
+    private void recycleVelocityTracker()
+    {
+        if (mVelocityTracker != null)
+        {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
     }
 
-    private void initOrResetVelocityTracker() {
-        if (mVelocityTracker == null) {
+    private void initOrResetVelocityTracker()
+    {
+        if (mVelocityTracker == null)
+        {
             mVelocityTracker = VelocityTracker.obtain();
-        } else {
+        } else
+        {
             mVelocityTracker.clear();
         }
     }
 
-    private void initVelocityTrackerIfNotExists() {
-        if (mVelocityTracker == null) {
+    private void initVelocityTrackerIfNotExists()
+    {
+        if (mVelocityTracker == null)
+        {
             mVelocityTracker = VelocityTracker.obtain();
         }
     }
+
     /**
      * 更新拖动的坐标，让图标跟随手一起动
      *
      * @param x view左上角坐标X
      * @param y view左上角坐标Y
      */
-    public void onFling(int x, int y) {
+    public void onFling(int x, int y)
+    {
         FingerFlowViewManager.getInstance().updatePosition(x, y);
     }
 
 
-
     /**
-    * 如果正在进行滑动动画，就停止动画
-    * */
+     * 如果正在进行滑动动画，就停止动画
+     */
     protected void stopScroll()
     {
         if (!mScroller.isFinished())
@@ -558,25 +577,26 @@ public abstract  class SpringboardView extends ViewGroup
     /**
      * 判断能否进行滑动
      */
-    protected boolean ifCanScroll(int deltaX) {
+    protected boolean ifCanScroll(int deltaX)
+    {
 
-        if(Math.abs(deltaX) > mTouchSlop)
+        if (Math.abs(deltaX) > mTouchSlop)
         {
-            if(deltaX < 0)
+            if (deltaX < 0)
             {
-                if(getScrollX() > 0)
+                if (getScrollX() > 0)
                 {
                     return true;
                 }
-            }else
+            } else
             {
-                if(getScrollX() < (getTotalPage() - 1) * getMeasuredWidth())
+                if (getScrollX() < (getTotalPage() - 1) * getMeasuredWidth())
                 {
                     return true;
                 }
             }
         }
-        return  false;
+        return false;
     }
 
     protected void countPageChange(int x)
@@ -584,25 +604,32 @@ public abstract  class SpringboardView extends ViewGroup
 //        Log.e("countPageChange"," x = " +x );
         if (x > getWidth() - 40
                 && mCurScreen < getTotalPage() - 1 && mScroller.isFinished()
-                && x > startX+10) {
+                && x > startX + 10)
+        {
             snapToScreen(mCurScreen + 1);
-        } else if (x  < 40
-                && mCurScreen > 0 && mScroller.isFinished() && x < startX-10) {
+        } else if (x < 40
+                && mCurScreen > 0 && mScroller.isFinished() && x < startX - 10)
+        {
             snapToScreen(mCurScreen - 1);
         }
     }
 
 
-    public void endScroll(float distance){
-        if (distance > getMeasuredWidth() / 6 && getmCurScreen() > 0) {
+    public void endScroll(float distance)
+    {
+        if (distance > getMeasuredWidth() / 6 && getmCurScreen() > 0)
+        {
             snapToScreen(getmCurScreen() - 1);
         } else if (distance < -getMeasuredWidth() / 6
-                && getmCurScreen() < getTotalPage() - 1) {
+                && getmCurScreen() < getTotalPage() - 1)
+        {
             snapToScreen(getmCurScreen() + 1);
-        } else {
+        } else
+        {
             final int screenWidth = getWidth();
             final int destScreen = (getScrollX() + screenWidth / 2) / screenWidth;
-            if (destScreen >= 0 && destScreen < getTotalPage()) {
+            if (destScreen >= 0 && destScreen < getTotalPage())
+            {
                 snapToScreen(destScreen);
             }
         }
@@ -616,9 +643,9 @@ public abstract  class SpringboardView extends ViewGroup
         whichScreen = Math.max(0, Math.min(whichScreen, getChildCount() - 1));
         if (getScrollX() != (whichScreen * getWidth()))
         {
-            final int delta = whichScreen * (getWidth()+page_divider_width) - getScrollX();
+            final int delta = whichScreen * (getWidth() + page_divider_width) - getScrollX();
 
-            if (whichScreen!=mCurScreen && onPageChangedListener != null)
+            if (whichScreen != mCurScreen && onPageChangedListener != null)
             {
                 onPageChangedListener.onPageScroll(mCurScreen, whichScreen);
             }
@@ -627,7 +654,6 @@ public abstract  class SpringboardView extends ViewGroup
             postInvalidate();// Redraw the layout
         }
     }
-
 
 
     @Override
@@ -641,8 +667,8 @@ public abstract  class SpringboardView extends ViewGroup
     }
 
     /**
-     *  判断是否在文件夹内
-     * */
+     * 判断是否在文件夹内
+     */
     public boolean isInCenter(int position, MotionEvent event)
     {
 
@@ -655,71 +681,75 @@ public abstract  class SpringboardView extends ViewGroup
 
         float x = event.getRawX(); // 获取相对于屏幕左上角的 x 坐标值
         float y = event.getRawY();
-        RectF rect  = new RectF(location[0], location[1], location[0] + view.getWidth(),
+        RectF rect = new RectF(location[0], location[1], location[0] + view.getWidth(),
                 location[1] + view.getHeight());
 
-        return rect.contains(x,y);
+        return rect.contains(x, y);
     }
 
 
-
-    protected void setEditingMode(int position,View child,boolean isEditing,boolean ifShake)
+    protected void setEditingMode(int position, View child, boolean isEditing, boolean ifShake)
     {
-        ImageView imageView = (ImageView)child.findViewById(R.id.delete_button_id);
-        FrameLayout layout = (FrameLayout)child.findViewById(R.id.shake_zone_id);;
-        if(isEditing)
+        ImageView imageView = (ImageView) child.findViewById(R.id.delete_button_id);
+        FrameLayout layout = (FrameLayout) child.findViewById(R.id.shake_zone_id);
+
+        if (isEditing)
         {
-            if(ifCanDelete(position))
+            if (ifCanDelete(position))
             {
                 imageView.setVisibility(View.VISIBLE);
 //                Log.e("setEditingMode","position  = canDelete" + position);
-            }else
+            } else
             {
 //                Log.e("setEditingMode", "position  = cannotDelete" + position);
                 imageView.clearAnimation();
                 imageView.setVisibility(View.GONE);
             }
 
-            if(ifCanMove(position)&&ifShake)
+            if (ifCanMove(position) && ifShake)
             {
                 Animation shake;
-                if(imageView.getVisibility() == View.VISIBLE)
+                if (imageView.getVisibility() == View.VISIBLE)
                 {
                     shake = AnimationUtils.loadAnimation(getContext(), R.anim.shake);
                     imageView.startAnimation(shake);
                 }
                 shake = AnimationUtils.loadAnimation(getContext(), R.anim.shake_rotate);
                 layout.startAnimation(shake);
-            }else
+            } else
             {
-                if(imageView.getVisibility() == View.VISIBLE)
+                if (imageView.getVisibility() == View.VISIBLE)
                 {
                     imageView.clearAnimation();
                 }
-                layout.clearAnimation();;
+                layout.clearAnimation();
             }
-        }else
+        } else
         {
             imageView.setVisibility(View.GONE);
             imageView.clearAnimation();
-            layout.clearAnimation();;
+            layout.clearAnimation();
         }
 
     }
 
-    public abstract  boolean ifCanMove(int position);
+    public abstract boolean ifCanMove(int position);
 
     public abstract boolean ifCanDelete(int position);
 
     /**
      * 获得View在父容器中的位置
-     * */
-    public int getChildIndex(View view) {
-        if (view != null) {
-            final int childCount =  ((ViewGroup)view.getParent())
+     */
+    public int getChildIndex(View view)
+    {
+        if (view != null)
+        {
+            final int childCount = ((ViewGroup) view.getParent())
                     .getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                if (view == ((ViewGroup) view.getParent()).getChildAt(i)) {
+            for (int i = 0; i < childCount; i++)
+            {
+                if (view == ((ViewGroup) view.getParent()).getChildAt(i))
+                {
                     return i;
                 }
             }
@@ -731,14 +761,17 @@ public abstract  class SpringboardView extends ViewGroup
      * @param x,y 触摸点所在的位置
      *            如果不在位置上返回－1，在的话返回位置
      */
-    public int pointToPosition(int x, int y) {
+    public int pointToPosition(int x, int y)
+    {
         int locX = x + mCurScreen * getWidth();
         Rect frame = new Rect();
         final int count = getChildCount();
-        for (int i = count - 1; i >= 0; i--) {
+        for (int i = count - 1; i >= 0; i--)
+        {
             final View child = getChildAt(i);
             child.getHitRect(frame);
-            if (frame.contains(locX, y)) {
+            if (frame.contains(locX, y))
+            {
                 return i;
             }
         }
@@ -756,7 +789,7 @@ public abstract  class SpringboardView extends ViewGroup
             int index = getChildIndex(v);
 //            Log.e("SpringboardView", "onItemLongClick 长按 位置是 " + index);
             getAdapter().setEditing(true);
-            if(ifCanMove(index))
+            if (ifCanMove(index))
             {
                 startDrag(v);
                 onStartFling(v, (int) mLastMotionX, (int) mLastMotionY);
@@ -769,13 +802,13 @@ public abstract  class SpringboardView extends ViewGroup
     public abstract void onItemClick(int position);
 
     /**
-    * 计算有几页
-    * */
+     * 计算有几页
+     */
     protected void computePageCountChange(boolean ifCallback)
     {
         int pages = (int) Math.ceil(getChildCount() * 1.0 / getPageItemCount());
 
-        if(pages == 0)
+        if (pages == 0)
         {
             pages++;
         }
@@ -799,31 +832,37 @@ public abstract  class SpringboardView extends ViewGroup
 
     public void configView(FrameLayout view)
     {
-        view.setOnLongClickListener(new View.OnLongClickListener() {
+        view.setOnLongClickListener(new View.OnLongClickListener()
+        {
             @Override
-            public boolean onLongClick(View v) {
+            public boolean onLongClick(View v)
+            {
                 return onItemLongClick(v);
             }
         });
 
-        view.setOnClickListener(new View.OnClickListener() {
+        view.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View arg0) {
+            public void onClick(View arg0)
+            {
                 int position = indexOfChild(arg0);
                 onItemClick(position);
             }
         });
         ImageView imageView = new ImageView(getContext());
         imageView.setImageDrawable(deleteIcon);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.TOP | Gravity.END;
-        params.setMargins(0,4,4,0);
+        params.setMargins(0, 4, 4, 0);
         imageView.setId(R.id.delete_button_id);
         view.addView(imageView, params);
         imageView.setVisibility(View.GONE);
-        imageView.setOnClickListener(new OnClickListener() {
+        imageView.setOnClickListener(new OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 int index = getChildIndex((ViewGroup) v.getParent());
                 delete(index);
             }
@@ -848,26 +887,26 @@ public abstract  class SpringboardView extends ViewGroup
 
         for (int i = 0; i < count; i++)
         {
-            FrameLayout view =  initItemView(i);
+            FrameLayout view = initItemView(i);
             configView(view);
             this.addView(view);
         }
     }
 
-    public abstract  int getItemCount();
+    public abstract int getItemCount();
 
-    public abstract  FrameLayout initItemView(int position);
+    public abstract FrameLayout initItemView(int position);
 
-    public  void delete(int position)
+    public void delete(int position)
     {
         onDelete(position);
-        if(totalPage<= mCurScreen)
+        if (totalPage <= mCurScreen)
         {
             snapToScreen(totalPage - 1);
         }
     }
 
-    public abstract  void onDelete(int position);
+    public abstract void onDelete(int position);
 
 
 //    /**
@@ -886,70 +925,79 @@ public abstract  class SpringboardView extends ViewGroup
 //        }
 //    }
 
-    public PointF positionToPoint2(int position)
-    {
-        PointF point = new PointF();
-
-        int page = position / getColCount() / getRowCount();
-
-        int row = position / getColCount() % getRowCount();
-
-        int col = (position  - (page * getPageItemCount())) % getColCount();
-
-
-        int left = getPaddingLeft() + (getWidth() + page_divider_width)*page + col * (dividerWidth + getChildWidth()) + dividerWidth;
-
-        int top = getPaddingTop() + row * (dividerWidth + getChildHeight());
-
-        point.x = left;
-
-        point.y = top;
-
-        return point;
-    }
+//    public PointF positionToPoint2(int position) {
+//        PointF point = new PointF();
+//
+//        int page = position / getColCount() / getRowCount();
+//
+//        int row = position / getColCount() % getRowCount();
+//
+//        int col = (position - (page * getPageItemCount())) % getColCount();
+//
+//
+//        int left = getPaddingLeft() + (getWidth() + page_divider_width) * page + col * (dividerWidth + getChildWidth()) + dividerWidth;
+//
+//        int top = getPaddingTop() + row * (dividerWidth + getChildHeight());
+//
+//        point.x = left;
+//
+//        point.y = top;
+//
+//        return point;
+//    }
 
     public int getmMinimumVelocity()
     {
         return mMinimumVelocity;
     }
 
-    public int getColCount() {
+    public int getColCount()
+    {
         return colCount;
     }
 
-    public int getPageItemCount(){
+    public int getPageItemCount()
+    {
         return rowCount * colCount;
     }
 
-    public void setColCount(int colCount) {
+    public void setColCount(int colCount)
+    {
         this.colCount = colCount;
     }
 
-    public int getmCurScreen() {
+    public int getmCurScreen()
+    {
         return mCurScreen;
     }
 
-    public void setmCurScreen(int mCurScreen) {
+    public void setmCurScreen(int mCurScreen)
+    {
         this.mCurScreen = mCurScreen;
     }
 
-    public int getRowCount() {
+    public int getRowCount()
+    {
         return rowCount;
     }
 
-    public void setRowCount(int rowCount) {
+    public void setRowCount(int rowCount)
+    {
         this.rowCount = rowCount;
     }
 
-    public int getChildHeight(){
+    public int getChildHeight()
+    {
         return getChildAt(0).getWidth();
     }
 
-    public int getChildWidth(){
+    public int getChildWidth()
+    {
         return getChildAt(0).getHeight();
     }
 
-    public int getTotalPage() {
+    public int getTotalPage()
+    {
         return totalPage;
     }
 
@@ -971,7 +1019,8 @@ public abstract  class SpringboardView extends ViewGroup
     public interface OnPageChangedListener
     {
         void onPageScroll(int from, int to);
-        void onPageCountChange(int oldCount,int newCount);
+
+        void onPageCountChange(int oldCount, int newCount);
     }
 
     public interface OnItemClickListener
@@ -981,58 +1030,34 @@ public abstract  class SpringboardView extends ViewGroup
 
     private OnItemClickListener onItemClickListener;
 
-    public OnItemClickListener getOnItemClickListener() {
+    public OnItemClickListener getOnItemClickListener()
+    {
         return onItemClickListener;
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener)
+    {
         this.onItemClickListener = onItemClickListener;
     }
 
-    private String getActionName(MotionEvent ev)
+    public int getStableHeaderCount()
     {
-        String action;
-        switch(ev.getAction())
-        {
-            case 0:
-                action = "ACTION_DOWN";
-                break;
-            case 1:
-                action = "ACTION_UP";
-                break;
-            case 2:
-                action = "ACTION_MOVE";
-                break;
-            case 3:
-                action = "ACTION_CANCEL";
-                break;
-            default:
-                action = "其它";
-                break;
-        }
-        return action;
-    }
-
-    public int getStableHeaderCount() {
         return stableHeaderCount;
     }
 
-    public void setStableHeaderCount(int stableHeaderCount) {
+    public void setStableHeaderCount(int stableHeaderCount)
+    {
         this.stableHeaderCount = stableHeaderCount;
     }
 
-    public boolean isLastItemStable() {
+    public boolean isLastItemStable()
+    {
         return isLastItemStable;
     }
 
-    public void setIsLastItemStable(boolean isLastItemStable) {
+    public void setIsLastItemStable(boolean isLastItemStable)
+    {
         this.isLastItemStable = isLastItemStable;
     }
-//    protected  void onDataChange()
-//    {
-//        if(onItemDataChangeListener != null)
-//        {
-//            onItemDataChangeListener.onItemDataChange();
-//        }
-//    }
+
 }

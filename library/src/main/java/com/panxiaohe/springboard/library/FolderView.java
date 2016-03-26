@@ -2,7 +2,6 @@ package com.panxiaohe.springboard.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,7 +12,8 @@ import android.widget.FrameLayout;
  * Created by panxiaohe on 16/3/9.
  * 展示文件夹的View
  */
-public class FolderView extends SpringboardView {
+public class FolderView extends SpringboardView
+{
 
 
     private boolean isOutOfFolder = false;
@@ -24,22 +24,26 @@ public class FolderView extends SpringboardView {
 
     private int folderPosition;
 
-    public FolderView(Context context) {
+    public FolderView(Context context)
+    {
         super(context);
     }
 
-    public FolderView(Context context, AttributeSet attrs) {
+    public FolderView(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
     }
 
-    public FolderView(Context context, AttributeSet attrs, int defStyle) {
+    public FolderView(Context context, AttributeSet attrs, int defStyle)
+    {
         super(context, attrs, defStyle);
     }
 
     /**
      * 判断是否手指移动到文件夹外边了
      */
-    public boolean moveOutFolder(int x, int y) {
+    public boolean moveOutFolder(int x, int y)
+    {
         return x < 0 || y < 0 || x > getWidth() || y > getHeight();
     }
 
@@ -50,20 +54,24 @@ public class FolderView extends SpringboardView {
         int x = (int) event.getX();
         int y = (int) event.getY();
 
-        if (isOutOfFolder == false && moveOutFolder(x, y))
+        if (!isOutOfFolder && moveOutFolder(x, y))
         {
 //            Log.e("FolderLayout", "拖动中，拖出文件夹区域了");
             getParentLayout().hideFolder();
-            dragOutItem =  getAdapter().tempRemoveItem(folderPosition,temChangPosition);
+            dragOutItem = getAdapter().tempRemoveItem(folderPosition, temChangPosition);
             isOutOfFolder = true;
             dragPosition = -1;
         }
 
-        if (v < getmMinimumVelocity()) {
-            if (isOutOfFolder) {
+        if (v < getmMinimumVelocity())
+        {
+            if (isOutOfFolder)
+            {
                 parentLayout.dragOnChild(dragOutItem, event);
-            } else {
-                if (dragPosition != -1 && temChangPosition != dragPosition) {
+            } else
+            {
+                if (dragPosition != -1 && temChangPosition != dragPosition)
+                {
 //                    Log.e("FolderLayout", "交换位置 " + temChangPosition + " -->" + dragPosition);
                     onExchange();
                 }
@@ -72,14 +80,18 @@ public class FolderView extends SpringboardView {
 
         }
     }
-    @Override
-    public void onDragFinished(MotionEvent event) {
 
-        int x = (int) event.getRawX();
-        int y = (int) event.getRawY();
-        if (isOutOfFolder) {
-            getParentLayout().onActionFolderClosed(dragOutItem,event);
-        } else {
+    @Override
+    public void onDragFinished(MotionEvent event)
+    {
+
+//        int x = (int) event.getRawX();
+//        int y = (int) event.getRawY();
+        if (isOutOfFolder)
+        {
+            getParentLayout().onActionFolderClosed(dragOutItem, event);
+        } else
+        {
 //            Log.e("FolderLayout", "拖动结束，安置在" + temChangPosition + "位置");
             getChildAt(temChangPosition).setVisibility(View.VISIBLE);
 //            setAnimationEnd();
@@ -108,12 +120,13 @@ public class FolderView extends SpringboardView {
     }
 
 
-
-    public MenuView getParentLayout() {
+    public MenuView getParentLayout()
+    {
         return parentLayout;
     }
 
-    public void setParentLayout(MenuView parentLayout) {
+    public void setParentLayout(MenuView parentLayout)
+    {
         this.parentLayout = parentLayout;
     }
 
@@ -137,13 +150,14 @@ public class FolderView extends SpringboardView {
     @Override
     public void onItemClick(int position)
     {
-        if(getAdapter().isEditting())
+        if (getAdapter().isEditting())
         {
             getAdapter().setEditing(false);
-        }else{
-            if(getOnItemClickListener()!=null)
+        } else
+        {
+            if (getOnItemClickListener() != null)
             {
-                getOnItemClickListener().onItemClick(getAdapter().getSubItem(folderPosition,position));
+                getOnItemClickListener().onItemClick(getAdapter().getSubItem(folderPosition, position));
             }
         }
 
@@ -151,12 +165,14 @@ public class FolderView extends SpringboardView {
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return getAdapter().getSubItemCount(folderPosition);
     }
 
     @Override
-    public FrameLayout initItemView(int position) {
+    public FrameLayout initItemView(int position)
+    {
         FrameLayout view = mAdapter.initSubItemView(folderPosition, position, this);
         mAdapter.configSubItemView(folderPosition, position, view);
         return view;
@@ -172,10 +188,9 @@ public class FolderView extends SpringboardView {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event)
     {
-        if(event.getKeyCode() == KeyEvent.KEYCODE_BACK)
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK)
         {
             getParentLayout().removeFolder();
-//            Log.e("dispatchKeyEvent",event.toString());
             return true;
         }
         return super.dispatchKeyEvent(event);

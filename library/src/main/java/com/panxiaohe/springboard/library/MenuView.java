@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,9 +19,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
-import java.util.ArrayList;
-
 
 /**
  * Created by panxiaohe on 16/3/9.
@@ -39,7 +35,8 @@ public class MenuView extends SpringboardView
 
     private WindowManager getWindowManager()
     {
-        if (windowManager == null) {
+        if (windowManager == null)
+        {
             windowManager = (WindowManager) getContext().getSystemService(
                     Context.WINDOW_SERVICE);
         }
@@ -55,7 +52,7 @@ public class MenuView extends SpringboardView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
         {
             windowParams.flags = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-        }else
+        } else
         {
             windowParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         }
@@ -66,8 +63,8 @@ public class MenuView extends SpringboardView
         return windowParams;
     }
 
-    private int folderColCount  = 3;
-    private int folderRowCount  = 3;
+    private int folderColCount = 3;
+    private int folderRowCount = 3;
 
     private Drawable folderDialogBackground;
     private Drawable folderViewBackground;
@@ -104,26 +101,27 @@ public class MenuView extends SpringboardView
         folder_editText_textSize = a.getDimensionPixelSize(R.styleable.Springboard_folder_edittext_textsize, 15);
         a.recycle();
         // 点击区域外取消编辑状态
-        this.setOnClickListener(new OnClickListener() {
+        this.setOnClickListener(new OnClickListener()
+        {
 
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 getAdapter().setEditing(false);
             }
         });
     }
 
 
-
     @Override
     public void onItemClick(int position)
     {
-        if(getAdapter().getItem(position).isFolder())
+        if (getAdapter().getItem(position).isFolder())
         {
             showFolder(position);
-        }else
+        } else
         {
-            if (getAdapter().isEditting() )
+            if (getAdapter().isEditting())
             {
                 getAdapter().setEditing(false);
             } else
@@ -137,7 +135,8 @@ public class MenuView extends SpringboardView
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
         return getAdapter().getCount();
     }
 
@@ -150,32 +149,32 @@ public class MenuView extends SpringboardView
     }
 
     @Override
-    public void onBeingDragging(MotionEvent event,float v)
+    public void onBeingDragging(MotionEvent event, float v)
     {
-    	
-        int x = (int)event.getX();
-        int y = (int)event.getY();
-        if(v < getmMinimumVelocity())
+
+        int x = (int) event.getX();
+//        int y = (int)event.getY();
+        if (v < getmMinimumVelocity())
         {
 //            Log.e("速度",v+"");
-           //初始位置和触摸位置不同时
-        	if(dragPosition != -1 && dragPosition != temChangPosition)
-        	{
+            //初始位置和触摸位置不同时
+            if (dragPosition != -1 && dragPosition != temChangPosition)
+            {
 //        		如果在头部或尾部区域，不进行操作
-        		if(ifCanMove(dragPosition))
-        		{
-        			//如果被拖动的是文件夹或者不在item内部区域，交换位置
-        			if((getAdapter().getItem(temChangPosition).isFolder())||(!isInCenter(dragPosition, event)))
-             	   	{
+                if (ifCanMove(dragPosition))
+                {
+                    //如果被拖动的是文件夹或者不在item内部区域，交换位置
+                    if ((getAdapter().getItem(temChangPosition).isFolder()) || (!isInCenter(dragPosition, event)))
+                    {
 //             		   Log.e("MenuView", "拖动中,交换位置，从" + temChangPosition + "到" + dragPosition);
-             		   onExchange();
+                        onExchange();
                     }
 //                    else
 //                    {
 //                        Log.e("MenuView", "在文件夹中dragPosition = "+dragPosition);
 //                    }
-            	}
-        	}
+                }
+            }
             countPageChange(x);
         }
 //        else
@@ -185,7 +184,8 @@ public class MenuView extends SpringboardView
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    protected void onLayout(boolean changed, int l, int t, int r, int b)
+    {
         super.onLayout(changed, l, t, r, b);
 
     }
@@ -195,13 +195,13 @@ public class MenuView extends SpringboardView
     {
 //        int x = (int) event.getX();
 //        int y = (int) event.getY();
-       //可以合并
-       if (getAdapter().ifCanMerge(temChangPosition, dragPosition))
-       {
-    	   		//在目标位置中心区域
-    	   if(dragPosition != -1 && temChangPosition != dragPosition && isInCenter(dragPosition,event))
-    	   {
-            	onMerge(temChangPosition, dragPosition);
+        //可以合并
+        if (getAdapter().ifCanMerge(temChangPosition, dragPosition))
+        {
+            //在目标位置中心区域
+            if (dragPosition != -1 && temChangPosition != dragPosition && isInCenter(dragPosition, event))
+            {
+                onMerge(temChangPosition, dragPosition);
             }
         }
 //        getChildAt(temChangPosition).setVisibility(View.VISIBLE);
@@ -229,17 +229,12 @@ public class MenuView extends SpringboardView
     @Override
     public boolean ifCanDelete(int position)
     {
-        if(position<getStableHeaderCount())
+        if (position < getStableHeaderCount())
         {
             return false;
         }
+        return !(position == getChildCount() - 1 && isLastItemStable()) && getAdapter().ifCanDelete(position);
 
-        if(position == getChildCount() - 1 && isLastItemStable())
-        {
-            return false;
-        }
-
-        return getAdapter().ifCanDelete(position);
     }
 
     protected void onActionFolderClosed(FavoritesItem dragOutItem, MotionEvent event)
@@ -250,7 +245,7 @@ public class MenuView extends SpringboardView
         if (temChangPosition != -1)
         {
             getChildAt(temChangPosition).setVisibility(View.VISIBLE);
-        }else
+        } else
         {
             int[] locations = new int[2];
             this.getLocationOnScreen(locations);
@@ -258,25 +253,25 @@ public class MenuView extends SpringboardView
             y = y - locations[1];
             dragPosition = pointToPosition(x, y);
 //            Log.e("dragPosition = ",dragPosition+"");
-            if(dragPosition != -1 && isInCenter(dragPosition,event) && ifCanMove(dragPosition))
+            if (dragPosition != -1 && isInCenter(dragPosition, event) && ifCanMove(dragPosition))
             {
 //                Log.e("ScrollLayout", "拖动结束，合并到文件夹 position = "+dragOutItem);
                 getAdapter().addItemToFolder(dragPosition, dragOutItem, defaultFolderName);
-            }else
+            } else
             {
 //                Log.e("ScrollLayout", "拖动结束，添加按钮到最后");
                 int position = getChildCount();
-                if(isLastItemStable())
+                if (isLastItemStable())
                 {
-                    position-- ;
+                    position--;
                 }
                 getAdapter().addItem(position, dragOutItem);
 
                 computePageCountChange(true);
 
-                if(getmCurScreen()<getTotalPage()-1)
+                if (getmCurScreen() < getTotalPage() - 1)
                 {
-                    snapToScreen(getTotalPage()-1);
+                    snapToScreen(getTotalPage() - 1);
                 }
             }
         }
@@ -284,13 +279,13 @@ public class MenuView extends SpringboardView
     }
 
     /**
-     * @param event    触摸点位置
+     * @param event       触摸点位置
      * @param dragOutItem 被拖出的按钮
      */
     protected void dragOnChild(FavoritesItem dragOutItem, MotionEvent event)
     {
 
-        if(!mScroller.isFinished() || mLayoutTransition.isRunning())
+        if (!mScroller.isFinished() || mLayoutTransition.isRunning())
         {
             return;
         }
@@ -307,12 +302,12 @@ public class MenuView extends SpringboardView
         {
             if (temChangPosition != -1)
             {
-                if(isLastItemStable() && dragPosition == getItemCount()-1)
+                if (isLastItemStable() && dragPosition == getItemCount() - 1)
                 {
 //                    Log.e("dragOnChild", "在最后区域不交换");
-                }else
+                } else
                 {
-                    if(temChangPosition != dragPosition && ifCanMove(dragPosition))
+                    if (temChangPosition != dragPosition && ifCanMove(dragPosition))
                     {
                         if (isInCenter(dragPosition, event))
                         {
@@ -324,36 +319,37 @@ public class MenuView extends SpringboardView
 //                            Log.e("dragOnChild","交换位置 "+temChangPosition +""+dragPosition);
                             onExchange();
                         }
-                    }else
+                    } else
                     {
 //                        Log.e("dragOnChild","位置没变");
                     }
                 }
             } else
             {
-                if(isLastItemStable() && dragPosition == getItemCount()-1)
+                if (isLastItemStable() && dragPosition == getItemCount() - 1)
                 {
 //                    Log.e("dragOnChild","添加按钮到位置 "+dragPosition);
                     getAdapter().addItem(dragPosition, dragOutItem);
                     temChangPosition = dragPosition;
                     getChildAt(temChangPosition).setVisibility(View.INVISIBLE);
                     computePageCountChange(true);
-                }else
+                } else
                 {
-                    if (!isInCenter(dragPosition, event)&&ifCanMove(dragPosition))
+                    if (!isInCenter(dragPosition, event) && ifCanMove(dragPosition))
                     {
 //                        Log.e("dragOnChild","添加按钮到位置 "+dragPosition);
                         getAdapter().addItem(dragPosition, dragOutItem);
                         temChangPosition = dragPosition;
                         getChildAt(temChangPosition).setVisibility(View.INVISIBLE);
                         computePageCountChange(true);
-                    }else
+                    } else
                     {
 //                        Log.e("dragOnChild","在文件夹中或者"+dragPosition);
                     }
                 }
             }
-        }else if(temChangPosition != -1) {
+        } else if (temChangPosition != -1)
+        {
 //            Log.e("dragOnChild","移除View区域,删除位置是"+temChangPosition + " 的按钮");
             onDelete(temChangPosition);
             temChangPosition = -1;
@@ -366,33 +362,33 @@ public class MenuView extends SpringboardView
      */
     public void showFolder(int position)
     {
-        if(getAdapter().isEditting())
+        if (getAdapter().isEditting())
         {
             stopShake();
             isStopShake = true;
         }
-        FavoritesItem info =  getAdapter().getItem(position);
-        folderView = LayoutInflater.from(getContext()).inflate(R.layout.folder_layout, this,false);
-        if(folderDialogBackground != null)
+        FavoritesItem info = getAdapter().getItem(position);
+        folderView = LayoutInflater.from(getContext()).inflate(R.layout.folder_layout, this, false);
+        if (folderDialogBackground != null)
         {
             folderView.setBackground(folderDialogBackground);
         }
-        LinearLayout linearLayout = (LinearLayout)folderView.findViewById(R.id.folder_container);
+        LinearLayout linearLayout = (LinearLayout) folderView.findViewById(R.id.folder_container);
 
-        if(folderViewBackground != null)
+        if (folderViewBackground != null)
         {
             linearLayout.setBackground(folderViewBackground);
         }
         EditText editText = (EditText) folderView.findViewById(R.id.editText1);
-        if(editTextBackground != null)
+        if (editTextBackground != null)
         {
             editText.setBackground(editTextBackground);
         }
-        if(folder_editText_textColor != 0)
+        if (folder_editText_textColor != 0)
         {
             editText.setTextColor(folder_editText_textColor);
         }
-        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX,folder_editText_textSize);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, folder_editText_textSize);
         editText.setText(info.getActionName());
 
         FolderView layout = (FolderView) folderView.findViewById(R.id.container);
@@ -403,13 +399,15 @@ public class MenuView extends SpringboardView
         layout.setFolderPosition(position);
         layout.setAdapter(getAdapter());
         layout.setOnItemClickListener(getOnItemClickListener());
-        folderView.setOnClickListener(new OnClickListener() {
+        folderView.setOnClickListener(new OnClickListener()
+        {
 
             @Override
-            public void onClick(View v) {
-				removeFolder();
-			}
-		});
+            public void onClick(View v)
+            {
+                removeFolder();
+            }
+        });
         getWindowManager().addView(folderView, getWindowParams());
 
         getAdapter().initFolderEditingMode();
@@ -419,11 +417,12 @@ public class MenuView extends SpringboardView
     public void stopShake()
     {
         int count = getChildCount();
-        for(int i = 0;i<count;i++)
+        for (int i = 0; i < count; i++)
         {
             View child = getChildAt(i);
-            ImageView imageView = (ImageView)child.findViewById(R.id.delete_button_id);
-            FrameLayout layout = (FrameLayout)child.findViewById(R.id.shake_zone_id);;
+            ImageView imageView = (ImageView) child.findViewById(R.id.delete_button_id);
+            FrameLayout layout = (FrameLayout) child.findViewById(R.id.shake_zone_id);
+            ;
             imageView.clearAnimation();
             layout.clearAnimation();
         }
@@ -432,15 +431,15 @@ public class MenuView extends SpringboardView
     public void startShake()
     {
         int count = getChildCount();
-        for(int i = 0;i<count;i++)
+        for (int i = 0; i < count; i++)
         {
             View child = getChildAt(i);
-            ImageView imageView = (ImageView)child.findViewById(R.id.delete_button_id);
-            FrameLayout layout = (FrameLayout)child.findViewById(R.id.shake_zone_id);
+            ImageView imageView = (ImageView) child.findViewById(R.id.delete_button_id);
+            FrameLayout layout = (FrameLayout) child.findViewById(R.id.shake_zone_id);
             Animation shake;
-            if(ifCanMove(i))
+            if (ifCanMove(i))
             {
-                if(imageView.getVisibility() == View.VISIBLE)
+                if (imageView.getVisibility() == View.VISIBLE)
                 {
                     shake = AnimationUtils.loadAnimation(getContext(), R.anim.shake);
                     imageView.startAnimation(shake);
@@ -464,9 +463,9 @@ public class MenuView extends SpringboardView
             getWindowManager().updateViewLayout(folderView, params);
         }
 
-        if(getAdapter().isEditting())
+        if (getAdapter().isEditting())
         {
-            if(isStopShake == true)
+            if (isStopShake == true)
             {
                 startShake();
                 isStopShake = false;
@@ -475,22 +474,23 @@ public class MenuView extends SpringboardView
     }
 
     private boolean isStopShake = false;
+
     /**
      * 清除View
      */
     public void removeFolder()
     {
 //    	Log.e("ScrollLayout", "是否在编辑状态"+getAdapter().isEditting());
-        if(getAdapter().isEditting())
+        if (getAdapter().isEditting())
         {
-            if(isStopShake == true)
+            if (isStopShake == true)
             {
                 startShake();
                 isStopShake = false;
             }
         }
 
-    	if(folderView!=null)
+        if (folderView != null)
         {
 
             EditText editText = (EditText) folderView.findViewById(R.id.editText1);
@@ -503,7 +503,7 @@ public class MenuView extends SpringboardView
             getWindowManager().removeView(folderView);
             folderView = null;
             getAdapter().removeFolder();
-    	}
+        }
     }
 
 
@@ -511,7 +511,7 @@ public class MenuView extends SpringboardView
     public boolean dispatchKeyEvent(KeyEvent event)
     {
 
-        if(event.getKeyCode() == KeyEvent.KEYCODE_BACK&& getAdapter().isEditting())
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && getAdapter().isEditting())
         {
             getAdapter().setEditing(false);
             return true;

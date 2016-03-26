@@ -1,7 +1,6 @@
 package com.panxiaohe.springboard.library;
 
 
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -27,14 +26,15 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     /**
      * 首个层级数量
-     * */
-    public  int getCount()
+     */
+    public int getCount()
     {
         return items.size();
     }
+
     /**
      * 文件夹里按钮数量
-     * */
+     */
     public int getSubItemCount(int position)
     {
         return items.get(position).getSubItemCount();
@@ -42,41 +42,42 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     /**
      * 首个层级item
-     * */
-    public   T getItem(int position)
+     */
+    public T getItem(int position)
     {
         return items.get(position);
     }
+
     /**
      * 首个层级item
-     * */
-    public T getSubItem(int folderPosition,int position)
+     */
+    public T getSubItem(int folderPosition, int position)
     {
-        return (T)items.get(folderPosition).getSubItem(position);
+        return (T) items.get(folderPosition).getSubItem(position);
     }
 
     /**
-     * @return 只需返回所需的view,所有设置请在configUI里完成
-     * */
+     * @return 只需返回所需的view, 所有设置请在configUI里完成
+     */
     public abstract FrameLayout initItemView(int position, ViewGroup parent);
 
-    public abstract void configItemView(int position,FrameLayout frameLayout);
+    public abstract void configItemView(int position, FrameLayout frameLayout);
 
     /**
-     * @return 只需返回所需的view,所有设置请在configUI里完成
-     * */
-    public abstract FrameLayout initSubItemView(int folderPosition,int position, ViewGroup parent);
+     * @return 只需返回所需的view, 所有设置请在configUI里完成
+     */
+    public abstract FrameLayout initSubItemView(int folderPosition, int position, ViewGroup parent);
 
-    public abstract void configSubItemView(int folderPosition,int position,FrameLayout frameLayout);
+    public abstract void configSubItemView(int folderPosition, int position, FrameLayout frameLayout);
 
-    public void exchangeItem(int fromPosition ,int toPosition)
+    public void exchangeItem(int fromPosition, int toPosition)
     {
 //        Log.e("SpringboardAdapter","exchangeItem fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T item = items.remove(fromPosition);
 
         SpringboardView container = getSpringboardView();
 
-        FrameLayout view = (FrameLayout)container.getChildAt(fromPosition);
+        FrameLayout view = (FrameLayout) container.getChildAt(fromPosition);
 
         container.removeView(view);
 
@@ -90,20 +91,21 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     }
 
-    public void exChangeSubItem(int folderPosition,int fromPosition ,int toPosition)
+    public void exChangeSubItem(int folderPosition, int fromPosition, int toPosition)
     {
 //        Log.e("SpringboardAdapter","exChangeSubItem folderPosition = "+folderPosition +"  fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T folder = items.get(folderPosition);
 
-        T item = (T)folder.getMenuList().remove(fromPosition);
+        T item = (T) folder.removeSubItem(fromPosition);
+//        (T)folder.getMenuList().remove(fromPosition);
 
         SpringboardView container = getFolderView();
 
-        FrameLayout view = (FrameLayout)container.getChildAt(fromPosition);
+        FrameLayout view = (FrameLayout) container.getChildAt(fromPosition);
 
         container.removeView(view);
 
-        folder.getMenuList().add(toPosition, item);
+        folder.addSubItem(toPosition, item);
 
         dataChange();
 
@@ -125,7 +127,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         getSpringboardView().removeViewAt(position);
     }
 
-    public void deleteItem(int folderPosition,int position)
+    public void deleteItem(int folderPosition, int position)
     {
 //        Log.e("SpringboardAdapter","deleteItem folderPosition = "+folderPosition+"  position = "+position);
         T folder = items.get(folderPosition);
@@ -140,18 +142,18 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
         configItemView(folderPosition, view);
 
-        if(!folder.isFolder())
+        if (!folder.isFolder())
         {
             getSpringboardView().setEditingMode(folderPosition, view, isEditing, true);
             getSpringboardView().removeFolder();
-        }else
+        } else
         {
             getSpringboardView().setEditingMode(folderPosition, view, isEditing, false);
         }
     }
 
 
-    public void mergeItem(int fromPosition, int toPosition,String defaultFolderName)
+    public void mergeItem(int fromPosition, int toPosition, String defaultFolderName)
     {
 //        Log.e("SpringboardAdapter","mergeItem fromPosition = "+fromPosition+"  toPosition = "+toPosition);
         T fromItem = items.get(fromPosition);
@@ -173,7 +175,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         getSpringboardView().removeViewAt(fromPosition);
     }
 
-    public T tempRemoveItem(int folderPosition,int position)
+    public T tempRemoveItem(int folderPosition, int position)
     {
         T folder = items.get(folderPosition);
 
@@ -190,7 +192,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         return item;
     }
 
-    public void addItem(int position , T item)
+    public void addItem(int position, T item)
     {
 //        Log.e("SpringboardAdapter","addItem position = "+position);
         items.add(position, item);
@@ -205,7 +207,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     }
 
-    public void addItemToFolder(int dragPosition, T dragOutItem,String defaultName)
+    public void addItemToFolder(int dragPosition, T dragOutItem, String defaultName)
     {
 //        Log.e("SpringboardAdapter","addItemToFolder position = "+dragPosition);
         T folder = items.get(dragPosition);
@@ -219,7 +221,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     private void dataChange()
     {
-        if(!isTouching)
+        if (!isTouching)
         {
             onDataChange();
         }
@@ -238,7 +240,7 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public FolderView getFolderView()
     {
-        if(folderView != null)
+        if (folderView != null)
         {
             return folderView.get();
 
@@ -246,14 +248,15 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         return null;
     }
 
-    public void setFolderView(FolderView folderView) {
+    public void setFolderView(FolderView folderView)
+    {
         this.folderView = new SoftReference<>(folderView);
     }
 
     /**
      * @param position 位置
      * @return true 可以删除
-     * */
+     */
     public boolean ifCanDelete(int position)
     {
 //        Log.e("SpringboardAdapter",getItem(position).toString());
@@ -263,8 +266,8 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
     /**
      * @param position 位置
      * @return true 可以删除
-     * */
-    public boolean ifCanDelete(int folderPosition,int position)
+     */
+    public boolean ifCanDelete(int folderPosition, int position)
     {
         return !getSubItem(folderPosition, position).isFolder();
     }
@@ -278,10 +281,10 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
     {
         int folderPosition = getFolderView().getFolderPosition();
         T item = items.get(folderPosition);
-        if(item.isFolder())
+        if (item.isFolder())
         {
             String oldName = items.get(folderPosition).getActionName();
-            if(!oldName.equals(name))
+            if (!oldName.equals(name))
             {
                 items.get(folderPosition).setActionName(name);
 
@@ -294,43 +297,43 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
 
     public void setEditing(boolean isEditing)
     {
-        if(this.isEditing != isEditing)
-    	{
+        if (this.isEditing != isEditing)
+        {
 //            Log.e("SpringboardAdapter", "编辑模式" + isEditing);
             this.isEditing = isEditing;
             FolderView folder;
-            if(folderView!=null&& (folder = folderView.get()) != null)
+            if (folderView != null && (folder = folderView.get()) != null)
             {
                 int count = folder.getChildCount();
-                for(int i = 0 ; i < count;i++)
+                for (int i = 0; i < count; i++)
                 {
                     View child = folder.getChildAt(i);
-                    folder.setEditingMode(i, child, isEditing,true);
+                    folder.setEditingMode(i, child, isEditing, true);
                 }
-                if(isEditting())
+                if (isEditting())
                 {
                     folder.requestFocus();
                 }
                 int count1 = getSpringboardView().getChildCount();
-                for(int i = 0 ; i < count1;i++)
+                for (int i = 0; i < count1; i++)
                 {
                     View child1 = getSpringboardView().getChildAt(i);
-                    getSpringboardView().setEditingMode(i, child1, isEditing,false);
+                    getSpringboardView().setEditingMode(i, child1, isEditing, false);
                 }
-            }else
+            } else
             {
-                if(isEditting())
+                if (isEditting())
                 {
                     getSpringboardView().requestFocus();
                 }
                 int count1 = getSpringboardView().getChildCount();
-                for(int i = 0 ; i < count1;i++)
+                for (int i = 0; i < count1; i++)
                 {
                     View child1 = getSpringboardView().getChildAt(i);
-                    getSpringboardView().setEditingMode(i, child1, isEditing,true);
+                    getSpringboardView().setEditingMode(i, child1, isEditing, true);
                 }
             }
-    	}
+        }
     }
 
     public void initFolderEditingMode()
@@ -338,15 +341,15 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         if (isEditing)
         {
             FolderView folder;
-            if(folderView!=null&& (folder = folderView.get()) != null)
+            if (folderView != null && (folder = folderView.get()) != null)
             {
                 int count = folder.getChildCount();
-                for(int i = 0 ; i < count;i++)
+                for (int i = 0; i < count; i++)
                 {
                     View child = folder.getChildAt(i);
                     folder.setEditingMode(i, child, isEditing, true);
                 }
-                if(isEditting())
+                if (isEditting())
                 {
                     folder.requestFocus();
                 }
@@ -371,16 +374,19 @@ public abstract class SpringboardAdapter<T extends FavoritesItem>
         return items;
     }
 
-    public void setItems(ArrayList<T> items) {
+    public void setItems(ArrayList<T> items)
+    {
         this.items = items;
     }
 
 
-    protected boolean isTouching() {
+    protected boolean isTouching()
+    {
         return isTouching;
     }
 
-    protected void setIsTouching(boolean isTouching) {
+    protected void setIsTouching(boolean isTouching)
+    {
         this.isTouching = isTouching;
     }
 }
